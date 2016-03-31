@@ -6,4 +6,5 @@ private[scalaprops] object Platform {
   def randFromInt(seed: Int) = MersenneTwister32.standard(seed)
   def genSize = 100
   def className[A](clazz: Class[A]) = clazz.getCanonicalName
+  def charCount(codePoint: Int) = Character.charCount(codePoint)
 }

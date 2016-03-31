@@ -434,6 +434,9 @@ object Cogen extends CogenInstances0 {
   implicit val cogenAsciiString: Cogen[String @@ GenTags.Ascii] =
     Tag.subst(Cogen[String])
 
+  implicit val cogenUnicodeString: Cogen[String @@ GenTags.Unicode] =
+    Tag.subst(Cogen[String])
+
   implicit def cogenJavaEnum[A <: java.lang.Enum[A]]: Cogen[A] =
     Cogen[Int].contramap(_.ordinal)
 

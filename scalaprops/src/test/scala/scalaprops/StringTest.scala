@@ -6,7 +6,7 @@ import scalaprops.GenTags._
 
 object StringTest extends Scalaprops {
 
-  private[this] def test[A](values: Seq[Char])(implicit
+  private[this] def test0[A](expect: Char => Boolean)(implicit
     M: Monoid[String @@ A],
     G: Gen[String @@ A],
     C: Cogen[String @@ A],
@@ -14,7 +14,6 @@ object StringTest extends Scalaprops {
     O: Order[String @@ A],
     I: IsEmpty[({type l[_] = String @@ A})#l]
   ) = {
-    val expect = values.toSet
     val x = forAll{ str: (String @@ A) =>
       Tag.unwrap(str).forall(expect)
     }
@@ -26,11 +25,21 @@ object StringTest extends Scalaprops {
     x.toProperties(()).product(y)
   }
 
+  private[this] def test[A](values: Seq[Char])(implicit
+    M: Monoid[String @@ A],
+    G: Gen[String @@ A],
+    C: Cogen[String @@ A],
+    S: Show[String @@ A],
+    O: Order[String @@ A],
+    I: IsEmpty[({type l[_] = String @@ A})#l]
+  ) = test0[A](values.toSet)
+
   val num = test[GenTags.Num]('0' to '9')
   val upper = test[GenTags.AlphaUpper]('A' to 'Z')
   val lower = test[GenTags.AlphaLower]('a' to 'z')
   val alpha = test[GenTags.Alpha](('a' to 'z') ++ ('A' to 'Z'))
   val alphaNum = test[GenTags.AlphaNum](('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9'))
+  val unicode = test0[GenTags.Unicode](Character.isDefined)
 
   val genString = {
     val g = for {

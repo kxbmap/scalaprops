@@ -58,4 +58,10 @@ object GenTags {
   implicit val asciiStringInstance: StringInstance[String @@ Ascii] =
     Ascii.subst[StringInstance, String](scalaz.std.string.stringInstance)
 
+  sealed trait Unicode
+  val Unicode = Tag.of[Unicode]
+
+  implicit val unicodeStringInstance: StringInstance[String @@ Unicode] =
+    Unicode.subst[StringInstance, String](scalaz.std.string.stringInstance)
+
 }

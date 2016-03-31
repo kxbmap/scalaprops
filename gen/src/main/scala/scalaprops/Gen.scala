@@ -523,6 +523,31 @@ object Gen extends GenInstances0 {
   implicit val genAsciiString: Gen[String @@ GenTags.Ascii] =
     GenTags.Ascii.subst(asciiString)
 
+  lazy val unicodeString: Gen[String] = {
+    import java.lang.{ Character => C }
+    val codePoint: Gen[Int] = {
+      val cps = (C.MIN_CODE_POINT to C.MAX_CODE_POINT).filter { cp =>
+        (cp < C.MIN_SURROGATE || cp > C.MAX_SURROGATE) && C.isDefined(cp)
+      }
+      Gen.elements(cps.head, cps.tail: _*)
+    }
+    Gen.sized { n =>
+      Gen.sequenceNArray(n, codePoint).map { cps =>
+        @annotation.tailrec
+        def toString(i: Int, p: Int, arr: Array[Char]): String =
+          if (i < cps.length) {
+            val cs = C.toChars(cps(i))
+            System.arraycopy(cs, 0, arr, p, cs.length)
+            toString(i + 1, p + cs.length, arr)
+          } else new String(arr)
+        toString(0, 0, new Array(cps.foldLeft(0)(_ + Platform.charCount(_))))
+      }
+    }
+  }
+
+  implicit lazy val genUnicodeString: Gen[String @@ GenTags.Unicode] =
+    GenTags.Unicode.subst(unicodeString)
+
   implicit val genUnit: Gen[Unit] =
     value(())
 
